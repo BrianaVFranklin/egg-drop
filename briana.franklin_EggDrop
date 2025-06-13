@@ -1,0 +1,141 @@
+import simpleGE, pygame, random
+
+
+class Game(simpleGE.Scene):
+    def __init__(self):
+        super().__init__()
+        self.lblScore = LblScore()
+        self.score = 0
+        self.timer = lblTimer()
+        self.timer.totalTime = 30 
+        self.hen = Hen(self)
+        self.eggs = []
+        for i in range(10):
+            self.eggs.append(Egg(self))
+       
+        self.sprites = [self.hen, self.eggs, self.lblScore, self.lblTimer]
+       
+    def process(self):
+        for egg in self.eggs:
+            if self.hen.collidesWith(egg):
+                egg.reset()
+                self.score += 100
+                self.lblScore.text = f"Score: {self.score}"
+                
+        self.lblTime.text = f"Time Left: {self.timer.getTimeLeft()}"
+            if self.timer.getTimeLeft() < 0:
+                print(f"Score: {self.score}")
+                self.stop()
+
+class Instructions(simpleGE.Scene)
+    def _init_(self, prevScore):
+        super()._init_()
+        
+        self.prevScore = prevScore
+        
+        
+        self.setImage("Game Background.png")
+        self.response = "Quit" 
+        
+        self.directions = simleGE.Multilabel()
+        self.directions.textLines = [
+        "Use the left and right arrow keys to",
+        "allow Henrietta the Hen to catch the eggs",
+        "See how many eggs you can catch",
+        "before the time runs out"]
+        
+        self.directions.center = (320, 240)
+        self.directions.size = (500, 250)
+        
+        self.btnPlay = simpleGE.Button()
+        self.btnPlay.text = "Play"
+        self.btnPlay.center = (100,400)
+        
+        self.btnQuit = simpleGe.Button()
+        self.btnQuit.text = "Quit"
+        self.btnPlay.center = (500, 400)
+        
+        self.lblScore = simpleGe.Label()
+        self.lblScore.text = "Last score: 0"
+        self.lblScore.center = (320, 400)
+        
+        self.lblScore.text = f"Last score: {self.prevScore}"
+        
+        self.sprites = [self.directions, self.btnPlay, self.btnQuit, self.lblScore]
+    
+    def setPrevScore(self, prevScore):
+        self.prevScore = prevScore
+        self.lblScore.text = f"Last score: {self.prevScore}"
+    
+    def process(self):
+        if self.btnPlay.clicked:
+            self.response = "Play"
+            self.stop()
+        if self.btnQuit.clicked:
+            self.response = "Quit"
+            self.stop()
+
+class Hen(simpleGE.Sprite):
+    def __init__(self, scene):
+        super().__init__(scene)
+        self.setImage("henriettathehen.png")
+        self.position = (320, 240)
+       
+    def process(self):
+        if self.isKeyPressed(pygame.K_LEFT):
+            self.x -= 5
+        if self.isKeyPressed(pygame.K_RIGHT):
+            self.x += 5
+        if self.isKeyPressed(pygame.K_UP):
+            self.y -= 5
+        if self.isKeyPressed(pygame.K_DOWN):
+            self.y += 5
+ 
+class Egg(simpleGE.Sprite):
+    def __init__(self, scene):
+        super().__init__(scene)
+        self.setImage("Egg.png")
+        self.reset()
+       
+    def reset(self):
+        self.x = random.randint(0, self.screenWidth)
+        self.y = random.randint(0, self.screenHeight)
+       
+        self.dx = random.randint(-3, 3)
+        self.dy = random.randint(-3, 3)
+ 
+class LblScore(simpleGE.Label):
+    def __init__(self):
+        super().__init__()
+        self.text = "Score: 0"
+        self.center = (100, 100)
+
+class LblTimer(simpleGE.Label):
+    def _init_(self):
+        super()._init_()
+        self.text = "Time left: 10"
+        self.center = (500, 400)
+        
+def main():
+keepGoing = True
+    lastScore = 0
+    
+    while keepGoing:
+        instructions = Instructions(lastScore)
+        instructions.setPrevScore(lastScore)
+        instructions.start()
+        
+        if instructions.response == "Play":
+            game = Game()
+            game.start()
+            lastScore = game.score
+            
+        else:
+           keepGoing = False
+               print(instructions.response)
+       
+    game = Game()
+    game.start()
+   
+if __name__ == "__main__":
+    main()
